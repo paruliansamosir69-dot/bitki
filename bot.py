@@ -13,6 +13,8 @@ from googleapiclient.discovery import build
 
 load_dotenv()
 
+OWNER_ID = int(os.getenv("OWNER_ID", "0"))
+
 # =========================
 # CONFIG
 # =========================
@@ -1134,7 +1136,7 @@ async def add_command(
 ):
     global df
 
-    if not user_has_owner_access(interaction):
+    if not isinstance(interaction.user, discord.Member) or not user_has_owner_access(interaction):
         await interaction.response.send_message(
             make_owner_denied_message(),
             ephemeral=True,
@@ -1244,7 +1246,7 @@ async def edit_command(
 ):
     global df
 
-    if not user_has_owner_access(interaction):
+    if not isinstance(interaction.user, discord.Member) or not user_has_owner_access(interaction):
         await interaction.response.send_message(
             make_owner_denied_message(),
             ephemeral=True,
@@ -1343,7 +1345,7 @@ async def edit_command(
 async def delete_command(interaction: discord.Interaction, name: str):
     global df
 
-    if not user_has_owner_access(interaction):
+    if not isinstance(interaction.user, discord.Member) or not user_has_owner_access(interaction):
         await interaction.response.send_message(
             make_owner_denied_message(),
             ephemeral=True,
