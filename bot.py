@@ -407,13 +407,12 @@ def get_next_no_value(dataframe):
     return str(int(numeric_values.max()) + 1)
 
 
-def user_has_editor_access(member: discord.Member):
-    return any(role.name in EDITOR_ROLE_NAMES for role in member.roles)
+def user_has_owner_access(interaction: discord.Interaction):
+    return interaction.user.id == OWNER_ID
 
 
-def make_editor_denied_message():
-    roles_text = ", ".join(f"`{role}`" for role in EDITOR_ROLE_NAMES)
-    return f"⛔ You need one of these roles to use this command: {roles_text}"
+def make_owner_denied_message():
+    return "⛔ Only the bot owner can use this command."
 
 
 def append_item_to_sheet(no_value, name, country, tier, item_type, how_to_obtain):
@@ -1135,9 +1134,9 @@ async def add_command(
 ):
     global df
 
-    if not isinstance(interaction.user, discord.Member) or not user_has_editor_access(interaction.user):
+    if not user_has_owner_access(interaction):
         await interaction.response.send_message(
-            make_editor_denied_message(),
+            make_owner_denied_message(),
             ephemeral=True,
         )
         return
@@ -1245,9 +1244,9 @@ async def edit_command(
 ):
     global df
 
-    if not isinstance(interaction.user, discord.Member) or not user_has_editor_access(interaction.user):
+    if not user_has_owner_access(interaction):
         await interaction.response.send_message(
-            make_editor_denied_message(),
+            make_owner_denied_message(),
             ephemeral=True,
         )
         return
@@ -1344,9 +1343,9 @@ async def edit_command(
 async def delete_command(interaction: discord.Interaction, name: str):
     global df
 
-    if not isinstance(interaction.user, discord.Member) or not user_has_editor_access(interaction.user):
+    if not user_has_owner_access(interaction):
         await interaction.response.send_message(
-            make_editor_denied_message(),
+            make_owner_denied_message(),
             ephemeral=True,
         )
         return
@@ -1409,6 +1408,13 @@ async def delete_command(interaction: discord.Interaction, name: str):
     guild=discord.Object(id=GUILD_ID),
 )
 async def reload(interaction: discord.Interaction):
+    if not user_has_owner_access(interaction):
+        await interaction.response.send_message(
+            make_owner_denied_message(),
+            ephemeral=True,
+        )
+        return
+
     global df
     df = load_data()
     await interaction.response.send_message("✅ Data reloaded!", ephemeral=True)
